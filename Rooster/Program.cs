@@ -6,14 +6,16 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Timers;
+using System.Runtime.InteropServices;
 
 namespace Rooster
 {
     static class Program
     {
-        static string WebPath = @"/mnt/c/Users/bwdes/Desktop/";
+        static string WebPath = @"C:\Users\bwdes\Desktop\";
         static StreamWriter WebWriter;
         static List<string> klassen = new List<string>();
+        static List<string> done = new List<string>();
 
         static void Main(string[] args)
         {
@@ -36,10 +38,10 @@ namespace Rooster
         {
             System.Timers.Timer aTimer = (System.Timers.Timer)source;
             aTimer.Stop();
-            if (DateTime.Now.Hour == 7)
-            {
+            // if (DateTime.Now.Hour == 7)
+            // {
                 Check(klassen, CreateList(DownloadWebpage()));
-            }
+            // }
             Console.WriteLine("Top of the Hour @" + DateTime.Now);
             aTimer.Interval = MillisecondsToNextTopOfTheHour();
             aTimer.Start();
@@ -74,14 +76,10 @@ namespace Rooster
 
         private static bool Check(List<string> klassen, List<List<string>> Table)
         {
-            List<List<string>> ccc = new List<List<string>>();
-            foreach (var item in Table)
-            {
-                foreach (var titem in item)
-                {
-                    Console.WriteLine(titem.ToString());
-                }
+            if(DateTime.Now.Hour == 7){
+                done.Clear();
             }
+            List<List<string>> ccc = new List<List<string>>();
             // ResetWeb();
             foreach (var a in Table)
             {
@@ -91,7 +89,17 @@ namespace Rooster
                     // Console.WriteLine(a[2].ToString());
                     if (klassen.Contains(a[2].ToString()))
                     {
-                        PushLinux("o.mEonty4NidFqBOJGdL7nSltQtrbJFF57", a[3] + " - " + a[4], a[9],a[2]);
+                        if(!done.Contains(a[2].ToString() + " - " + a[3].ToString())){
+                            if(RuntimeInformation.IsOSPlatform(OSPlatform.Linux)){
+                                PushLinux("o.mEonty4NidFqBOJGdL7nSltQtrbJFF57", a[3] + " - " + a[4], a[9],a[2]);
+                            }
+                            else
+                            {
+                                Push("o.mEonty4NidFqBOJGdL7nSltQtrbJFF57", a[3] + " - " + a[4], a[9],a[2]);
+                            }
+                            done.Add(a[2].ToString() + " - " + a[3].ToString());
+                        }
+
                         if(a[2].Contains("H3F2"))
                         {
                             Console.WriteLine("dd");
