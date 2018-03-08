@@ -17,6 +17,9 @@ namespace Rooster
         static List<string> klassen = new List<string>();
         static List<string> done = new List<string>();
 
+        static string debugChannel = "debugh";
+        static bool debug = true;
+
         static void Main(string[] args)
         {
             klassen.Add("H3F2");
@@ -24,7 +27,10 @@ namespace Rooster
             //klassen.Add("H3D2");
  
             Console.WriteLine(MillisecondsToNextTopOfTheHour());
-            Check(klassen, CreateList(DownloadWebpage()));
+            if (debug)
+            {
+                Check(klassen, CreateList(DownloadWebpage()));
+            }
 
             Timer aTimer = new Timer(MillisecondsToNextTopOfTheHour());
             aTimer.Elapsed += OnTimedEvent;
@@ -63,15 +69,29 @@ namespace Rooster
         {
             HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
             doc.LoadHtml(Web);
+            try
+            {
+                List<List<string>> table = doc.DocumentNode.SelectSingleNode("//table")
+                            .Descendants("tr")
+                            .Skip(1)
+                            .Where(tr => tr.Elements("td").Count() > 1)
+                            .Select(tr => tr.Elements("td").Select(td => td.InnerText.Trim()).ToList())
+                            .ToList();
 
-            List<List<string>> table = doc.DocumentNode.SelectSingleNode("//table")
-                        .Descendants("tr")
-                        .Skip(1)
-                        .Where(tr => tr.Elements("td").Count() > 1)
-                        .Select(tr => tr.Elements("td").Select(td => td.InnerText.Trim()).ToList())
-                        .ToList();
-
-            return table;
+                return table;
+            }
+            catch(Exception e)
+            {
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    PushLinux("o.mEonty4NidFqBOJGdL7nSltQtrbJFF57","Clown", "Er heeft weer een clown met de site gekloot... Zelf ff kijken dus", "H3F2");
+                }
+                else
+                {
+                    Push("o.mEonty4NidFqBOJGdL7nSltQtrbJFF57", "Clown", "Er heeft weer een clown met de site gekloot... Zelf ff kijken dus", "H3F2");
+                }
+                return null;
+            }
         }
 
         private static bool Check(List<string> klassen, List<List<string>> Table)
@@ -91,11 +111,25 @@ namespace Rooster
                     {
                         if(!done.Contains(a[2].ToString() + " - " + a[3].ToString())){
                             if(RuntimeInformation.IsOSPlatform(OSPlatform.Linux)){
-                                PushLinux("o.mEonty4NidFqBOJGdL7nSltQtrbJFF57", a[3] + " - " + a[4], a[9],a[2]);
+                                if (!debug)
+                                {
+                                    PushLinux("o.mEonty4NidFqBOJGdL7nSltQtrbJFF57", a[3] + " - " + a[4], a[9], a[2]);
+                                }
+                                else
+                                {
+                                    PushLinux("o.mEonty4NidFqBOJGdL7nSltQtrbJFF57", a[3] + " - " + a[4], a[9], debugChannel);
+                                }
                             }
                             else
                             {
-                                Push("o.mEonty4NidFqBOJGdL7nSltQtrbJFF57", a[3] + " - " + a[4], a[9],a[2]);
+                                if (!debug)
+                                {
+                                    Push("o.mEonty4NidFqBOJGdL7nSltQtrbJFF57", a[3] + " - " + a[4], a[9], a[2]);
+                                }
+                                else
+                                {
+                                    Push("o.mEonty4NidFqBOJGdL7nSltQtrbJFF57", a[3] + " - " + a[4], a[9], debugChannel);
+                                }
                             }
                             done.Add(a[2].ToString() + " - " + a[3].ToString());
                         }
